@@ -1,23 +1,13 @@
 PyTDigest
 =========
 
-Python package for *fast* TDigest calculation.
+Python package for **fast** TDigest calculation.
 
 - C implementation and thin Python wrapper
-- suitable for big data and streaming and distributed settings
+- suitable for big data, streaming and distributed settings
 - developed for smooth compatibility with Pandas and numpy
 
 Based on previous work of Ted Dunning and Andrew Werner.
 
-Legal stuff
------------
-
-Apache License, Version 2.0,
-http://www.apache.org/licenses/LICENSE-2.0
-
-Copyright (c) 2015 Ted Dunning, All rights reserved.
-    https://github.com/tdunning/t-digest
-Copyright (c) 2018 Andrew Werner, All rights reserved.
-    https://github.com/ajwerner/tdigestc
-Copyright (c) 2022 Tomas Protivinsky, All rights reserved.
-    https://github.com/protivinsky/pytdigest
+- https://github.com/tdunning/t-digest
+- https://github.com/ajwerner/tdigestc

@@ -16,12 +16,15 @@ from __future__ import annotations
 import numpy as np
 from numpy.ctypeslib import ndpointer
 import pandas as pd
+import os
 import ctypes
 from numbers import Number
 from typing import Union, List, Iterable, Optional
 
 
-_tdigest_dll = ctypes.CDLL('pytdigest/tdigest.so')
+_path = os.path.dirname(os.path.realpath(__file__))
+_lib = ctypes.CDLL(os.path.join(_path, 'tdigest.so'))
+# _tdigest_dll = ctypes.CDLL('tdigest.so')
 
 class _Centroid(ctypes.Structure):
     _fields_ = [("mean", ctypes.c_double), ("weight", ctypes.c_double)]
@@ -39,31 +42,31 @@ class _TDigest(ctypes.Structure):
 
 
 # td_new
-_tdigest_dll.td_new.argtypes = [ctypes.c_double]
-_tdigest_dll.td_new.restype = ctypes.POINTER(_TDigest)
+_lib.td_new.argtypes = [ctypes.c_double]
+_lib.td_new.restype = ctypes.POINTER(_TDigest)
 # td_free
-_tdigest_dll.td_free.argtypes = [ctypes.POINTER(_TDigest)]
+_lib.td_free.argtypes = [ctypes.POINTER(_TDigest)]
 # td_add
-_tdigest_dll.td_add.argtypes = [ctypes.POINTER(_TDigest), ctypes.c_double, ctypes.c_double]
-_tdigest_dll.td_add_batch.argtypes = [
+_lib.td_add.argtypes = [ctypes.POINTER(_TDigest), ctypes.c_double, ctypes.c_double]
+_lib.td_add_batch.argtypes = [
     ctypes.POINTER(_TDigest),
     ctypes.c_int,
     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
 ]
 
-_tdigest_dll.td_quantile_of.argtypes = [ctypes.POINTER(_TDigest), ctypes.c_double]
-_tdigest_dll.td_quantile_of.restype = ctypes.c_double
-_tdigest_dll.td_cdf_batch.argtypes = [
+_lib.td_quantile_of.argtypes = [ctypes.POINTER(_TDigest), ctypes.c_double]
+_lib.td_quantile_of.restype = ctypes.c_double
+_lib.td_cdf_batch.argtypes = [
     ctypes.POINTER(_TDigest),
     ctypes.c_int,
     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
 ]
 
-_tdigest_dll.td_value_at.argtypes = [ctypes.POINTER(_TDigest), ctypes.c_double]
-_tdigest_dll.td_value_at.restype = ctypes.c_double
-_tdigest_dll.td_inverse_cdf_batch.argtypes = [
+_lib.td_value_at.argtypes = [ctypes.POINTER(_TDigest), ctypes.c_double]
+_lib.td_value_at.restype = ctypes.c_double
+_lib.td_inverse_cdf_batch.argtypes = [
     ctypes.POINTER(_TDigest),
     ctypes.c_int,
     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
@@ -73,30 +76,30 @@ _tdigest_dll.td_inverse_cdf_batch.argtypes = [
 # _tdigest_dll.td_copy.argtypes = [ctypes.POINTER(_TDigest)]
 # _tdigest_dll.td_copy.restype = ctypes.POINTER(_TDigest)
 
-_tdigest_dll.td_merge.argtypes = [ctypes.POINTER(_TDigest), ctypes.POINTER(_TDigest)]
+_lib.td_merge.argtypes = [ctypes.POINTER(_TDigest), ctypes.POINTER(_TDigest)]
 
-_tdigest_dll.td_total_weight.argtypes = [ctypes.POINTER(_TDigest)]
-_tdigest_dll.td_total_weight.restype = ctypes.c_double
-_tdigest_dll.td_total_sum.argtypes = [ctypes.POINTER(_TDigest)]
-_tdigest_dll.td_total_sum.restype = ctypes.c_double
+_lib.td_total_weight.argtypes = [ctypes.POINTER(_TDigest)]
+_lib.td_total_weight.restype = ctypes.c_double
+_lib.td_total_sum.argtypes = [ctypes.POINTER(_TDigest)]
+_lib.td_total_sum.restype = ctypes.c_double
 
-_tdigest_dll.merge.argtypes = [ctypes.POINTER(_TDigest)]
+_lib.merge.argtypes = [ctypes.POINTER(_TDigest)]
 
-_tdigest_dll.td_get_centroid.argtypes = [ctypes.POINTER(_TDigest), ctypes.c_int]
-_tdigest_dll.td_get_centroid.restype = ctypes.POINTER(_Centroid)
-_tdigest_dll.td_get_centroids.argtypes = [
+_lib.td_get_centroid.argtypes = [ctypes.POINTER(_TDigest), ctypes.c_int]
+_lib.td_get_centroid.restype = ctypes.POINTER(_Centroid)
+_lib.td_get_centroids.argtypes = [
     ctypes.POINTER(_TDigest),
     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
 ]
 
-_tdigest_dll.td_of_centroids.argtypes = [
+_lib.td_of_centroids.argtypes = [
     ctypes.c_double,
     ctypes.c_int,
     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
 ]
-_tdigest_dll.td_of_centroids.restype = ctypes.POINTER(_TDigest)
+_lib.td_of_centroids.restype = ctypes.POINTER(_TDigest)
 
-_tdigest_dll.td_fill_centroids.argtypes = [
+_lib.td_fill_centroids.argtypes = [
     ctypes.POINTER(_TDigest),
     ctypes.c_int,
     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
@@ -107,10 +110,10 @@ class TDigest:
 
     def __init__(self, compression=100):
         self.compression = compression
-        self._tdigest = _tdigest_dll.td_new(compression)
+        self._tdigest = _lib.td_new(compression)
 
     def __del__(self):
-        _tdigest_dll.td_free(self._tdigest)
+        _lib.td_free(self._tdigest)
 
     def update(self, x, w=None, raise_if_nans: bool = False):
         x = TDigest._unwrap_if_possible(x)
@@ -118,9 +121,9 @@ class TDigest:
         if isinstance(x, Number):
             if np.isfinite(x):
                 if w is None:
-                    w = 1.
+                    _lib.td_add(self._tdigest, float(x), 1.)
                 elif np.isfinite(w):
-                    _tdigest_dll.td_add(self._tdigest, float(x), w)
+                    _lib.td_add(self._tdigest, float(x), w)
                 elif raise_if_nans:
                     raise ValueError("Weight has an invalid value.")
             elif raise_if_nans:
@@ -145,7 +148,7 @@ class TDigest:
                     x = x.copy()
                 if not w.flags.c_contiguous:
                     w = w.copy()
-                _tdigest_dll.td_add_batch(self._tdigest, size, x, w)
+                _lib.td_add_batch(self._tdigest, size, x, w)
         else:
             raise TypeError("Values are unrecognized type.")
 
@@ -153,12 +156,12 @@ class TDigest:
         if isinstance(at, list):
             at = np.array(at)
         if isinstance(at, Number):
-            return _tdigest_dll.td_quantile_of(self._tdigest, at)
+            return _lib.td_quantile_of(self._tdigest, at)
         elif isinstance(at, np.ndarray):
             if at.ndim > 1:
                 raise "at parameter cannot be a multidimensional array."
             quantiles = np.empty_like(at)
-            _tdigest_dll.td_cdf_batch(self._tdigest, at.size, at, quantiles)
+            _lib.td_cdf_batch(self._tdigest, at.size, at, quantiles)
             return quantiles
         else:
             raise TypeError("At parameter is unrecognized type.")
@@ -167,12 +170,12 @@ class TDigest:
         if isinstance(quantile, list):
             quantile = np.array(quantile)
         if isinstance(quantile, Number):
-            return _tdigest_dll.td_value_at(self._tdigest, quantile)
+            return _lib.td_value_at(self._tdigest, quantile)
         elif isinstance(quantile, np.ndarray):
             if quantile.ndim > 1:
                 raise "Quantile cannot be a multidimensional array."
             values = np.empty_like(quantile)
-            _tdigest_dll.td_inverse_cdf_batch(self._tdigest, quantile.size, quantile, values)
+            _lib.td_inverse_cdf_batch(self._tdigest, quantile.size, quantile, values)
             return values
         else:
             raise TypeError("Quantile is unrecognized type.")
@@ -181,7 +184,7 @@ class TDigest:
         if not isinstance(other, TDigest):
             raise "Only TDigest can be add to TDigest."
         else:
-            _tdigest_dll.td_merge(self._tdigest, other._tdigest)
+            _lib.td_merge(self._tdigest, other._tdigest)
             return self
 
     def __add__(self, other):
@@ -210,17 +213,17 @@ class TDigest:
         if i >= self._num_merged + self._num_unmerged:
             raise IndexError(f'Cannot access centroid at index {i}, TDigest has only'
                              f' {self._num_merged + self._num_unmerged} centroids.')
-        centroid = _tdigest_dll.td_get_centroid(self._tdigest, i)
+        centroid = _lib.td_get_centroid(self._tdigest, i)
         return centroid.contents.mean, centroid.contents.weight
 
     def get_centroids(self):
         self.force_merge()
         centroids = np.empty(2 * self._num_merged, dtype='float')
-        _tdigest_dll.td_get_centroids(self._tdigest, centroids)
+        _lib.td_get_centroids(self._tdigest, centroids)
         return centroids.reshape([-1, 2])
 
     def force_merge(self):
-        _tdigest_dll.merge(self._tdigest)
+        _lib.merge(self._tdigest)
 
     # @staticmethod
     # def of_centroids(centroids: np.ndarray, compression: float = 100):
@@ -247,7 +250,7 @@ class TDigest:
         elif centroids.shape[0] > compression:
             print(f'Num of centroids seems large.')
         td = TDigest(compression)
-        _tdigest_dll.td_fill_centroids(td._tdigest, centroids.shape[0], centroids.reshape(-1))
+        _lib.td_fill_centroids(td._tdigest, centroids.shape[0], centroids.reshape(-1))
         return td
 
     @staticmethod
@@ -269,14 +272,14 @@ class TDigest:
 
     @property
     def weight(self):
-        return _tdigest_dll.td_total_weight(self._tdigest)
+        return _lib.td_total_weight(self._tdigest)
 
     @property
     def mean(self):
         if self.weight == 0:
             return np.nan
         else:
-            return _tdigest_dll.td_total_sum(self._tdigest) / self.weight
+            return _lib.td_total_sum(self._tdigest) / self.weight
 
     @property
     def _delta(self):
