@@ -1,3 +1,4 @@
+import os
 from distutils.command.build_ext import build_ext as build_ext_orig
 from setuptools import find_packages, setup, Extension
 
@@ -26,9 +27,9 @@ setup(
       name='pytdigest',
       version='0.0.1',
       description='Python package for *fast* TDigest calculation.',
-      py_modules=['pytdigest'],
+      #py_modules=['pytdigest'],
       ext_modules=[CTypesExtension(
-            name='tdigest',
+            name=os.path.join('pytdigest', 'tdigest'),
             sources=['pytdigest/tdigest.c'],
       )],
       cmdclass={'build_ext': build_ext},
@@ -44,16 +45,16 @@ setup(
             #   4 - Beta
             #   5 - Production/Stable
             "Development Status :: 3 - Alpha",
-            "Intended Audience :: Data Scientists",
-            "License :: OSI Approved :: APL",
+            "Intended Audience :: Science/Research",
+            "License :: OSI Approved :: Apache Software License",
             "Programming Language :: Python :: 3",
             "Programming Language :: Python :: 3.7",
             "Programming Language :: Python :: 3.8",
             "Programming Language :: Python :: 3.9",
             "Programming Language :: Python :: 3.10",
       ],
-      package_dir={"": "pytdigest"},
-      #packages=find_packages(where="pytdigest"),  # Required
+      #package_dir={"": "pytdigest"},
+      packages=find_packages(where="."),  # Required
       project_urls={  # Optional
             "Source": "https://github.com/protivinsky/pytdigest",
       },
