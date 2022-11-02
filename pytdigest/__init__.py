@@ -32,4 +32,4 @@ from .pytdigest import TDigest
 
 __all__ = ['TDigest']
 __author__ = 'Tomas Protivinsky'
-__version__ = "0.0.1"
+__version__ = "0.0.3"

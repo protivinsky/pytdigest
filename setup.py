@@ -1,12 +1,12 @@
 import os
-from distutils.command.build_ext import build_ext as build_ext_orig
+from distutils.command.build_ext import build_ext as _build_ext_distutils
 from setuptools import find_packages, setup, Extension
 
 
 class CTypesExtension(Extension): pass
 
 
-class build_ext(build_ext_orig):
+class _build_ext_ctypes(_build_ext_distutils):
 
     def build_extension(self, ext):
         self._ctypes = isinstance(ext, CTypesExtension)
@@ -25,14 +25,14 @@ class build_ext(build_ext_orig):
 
 setup(
       name='pytdigest',
-      version='0.0.1',
+      version='0.0.3',
       description='Python package for *fast* TDigest calculation.',
       #py_modules=['pytdigest'],
       ext_modules=[CTypesExtension(
             name=os.path.join('pytdigest', 'tdigest'),
             sources=['pytdigest/tdigest.c'],
       )],
-      cmdclass={'build_ext': build_ext},
+      cmdclass={'build_ext': _build_ext_ctypes},
       author='Tomas Protivinsky',
       author_email='tomas.protivinsky@gmail.com',
       url='https://github.com/protivinsky/pytdigest',

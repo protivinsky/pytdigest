@@ -284,7 +284,7 @@ double td_quantile_of(tdigest_t *td, double val) {
         for (i += 1; i < td->num_merged && td->centroids[i].mean == c->mean; i++) {
             weight_at_value += td->centroids[i].weight;
         }
-        return (k + (weight_at_value / 2)) / td->num_merged;
+        return (k + (weight_at_value / 2)) / td->merged_weight;
     } else if (val > c->mean) { // past the largest
         return 1;
     } else if (i == 0) {
