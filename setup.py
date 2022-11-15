@@ -25,7 +25,7 @@ class _build_ext_ctypes(_build_ext_distutils):
 
 setup(
       name='pytdigest',
-      version='0.0.3',
+      version='0.0.5',
       description='Python package for *fast* TDigest calculation.',
       #py_modules=['pytdigest'],
       ext_modules=[CTypesExtension(

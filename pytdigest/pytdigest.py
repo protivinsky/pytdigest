@@ -105,6 +105,11 @@ _lib.td_fill_centroids.argtypes = [
     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
 ]
 
+_lib.td_scale_weight.argtypes = [
+    ctypes.POINTER(_TDigest),
+    ctypes.c_double,
+]
+
 
 class TDigest:
 
@@ -129,12 +134,12 @@ class TDigest:
             elif raise_if_nans:
                 raise ValueError("Value is invalid.")
         elif isinstance(x, np.ndarray):
+            x = x.astype('float')
             # TODO: make this robust to nans and infinities
-            size = x.size
             if w is None:
                 w = np.ones_like(x)
             elif isinstance(w, np.ndarray):
-                if w.size != size:
+                if w.size != x.size:
                     raise TypeError("w has to be of the same size as values.")
             else:
                 raise TypeError("Weights are unrecognized type.")
@@ -148,7 +153,7 @@ class TDigest:
                     x = x.copy()
                 if not w.flags.c_contiguous:
                     w = w.copy()
-                _lib.td_add_batch(self._tdigest, size, x, w)
+                _lib.td_add_batch(self._tdigest, x.size, x, w)
         else:
             raise TypeError("Values are unrecognized type.")
 
@@ -269,6 +274,9 @@ class TDigest:
             if not (isinstance(first, TDigest) and isinstance(second, TDigest)):
                 raise TypeError(f'Both first and second arguments have to be instances of TDigest.')
             return first + second
+
+    def scale_weight(self, factor):
+        _lib.td_scale_weight(self._tdigest, float(factor))
 
     @property
     def weight(self):
