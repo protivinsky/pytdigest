@@ -20,11 +20,11 @@ import os
 import ctypes
 from numbers import Number
 from typing import Union, List, Iterable, Optional
+from enum import Enum
 
 
 _path = os.path.dirname(os.path.realpath(__file__))
 _lib = ctypes.CDLL(os.path.join(_path, 'tdigest.so'))
-# _tdigest_dll = ctypes.CDLL('tdigest.so')
 
 class _Centroid(ctypes.Structure):
     _fields_ = [("mean", ctypes.c_double), ("weight", ctypes.c_double)]
@@ -111,28 +111,67 @@ _lib.td_scale_weight.argtypes = [
 ]
 
 
-class TDigest:
+class HandlingInvalid(str, Enum):
+    Drop = 'drop'
+    Raise = 'raise'
 
-    def __init__(self, compression=100):
+
+class TDigest:
+    """TDigest can estimate an approximate empirical distribution in a single pass through data. Multiple TDigest
+    calculated of chunks of data can be combined to obtain approximate distribution of the overall dataset.
+    Estimated distribution can be then used to compute approximate empirical CDF (cumulative distribution function)
+    or inverse CDF (quantiles).
+
+    The precision of the estimation is controlled by `compression` parameter.
+    """
+
+    def __init__(self, compression: int = 100) -> TDigest:
+        """Initializes an empty TDigest object with provided compression.
+
+        Args:
+            compression: Higher compression value leads to more precise results and larger memory requirements.
+                Compression gives a maximum number of centroids of the internal representation after merging
+                of the TDigest. Unmerged representation can have up to roughly six times as many centroids.
+
+        """
         self.compression = compression
         self._tdigest = _lib.td_new(compression)
 
     def __del__(self):
         _lib.td_free(self._tdigest)
 
-    def update(self, x, w=None, raise_if_nans: bool = False):
+    def update(self,
+               x: Union[Number, np.ndarray, pd.Series],
+               w: Optional[Union[Number, np.ndarray, pd.Series]] = None,
+               handling_invalid: HandlingInvalid = HandlingInvalid.Drop):
+        """Add new data to TDigest.
+
+        Args:
+            x: Values to calculate the distribution of.
+            w: Optional weight for the values. If it is np.ndarray or pd.Series, it has to have the same
+                (one-dimensional) shape as x.
+            handling_invalid: How to handle invalid values in calculation ['drop', 'raise'], default value
+                'drop'. Provided either as enum or its string representation. The
+
+        Raises:
+            TypeError: If x or w are not of permitted types or of different types.
+            ValueError: If handling_invalid is 'raise' and there are invalid values in data (nan, infinity,
+                negative weight).
+        """
         x = TDigest._unwrap_if_possible(x)
         w = TDigest._unwrap_if_possible(w)
         if isinstance(x, Number):
             if np.isfinite(x):
                 if w is None:
                     _lib.td_add(self._tdigest, float(x), 1.)
+                elif not isinstance(w, Number):
+                    raise TypeError('If x is a single number, w has to be too.')
                 elif np.isfinite(w):
                     _lib.td_add(self._tdigest, float(x), w)
-                elif raise_if_nans:
-                    raise ValueError("Weight has an invalid value.")
-            elif raise_if_nans:
-                raise ValueError("Value is invalid.")
+                elif handling_invalid == HandlingInvalid.Raise:
+                    raise ValueError("w is invalid.")
+            elif handling_invalid == HandlingInvalid.Raise:
+                raise ValueError("x is invalid.")
         elif isinstance(x, np.ndarray):
             x = x.astype('float')
             # TODO: make this robust to nans and infinities
@@ -144,8 +183,8 @@ class TDigest:
             else:
                 raise TypeError("Weights are unrecognized type.")
             invalid = np.isnan(x) | np.isinf(x) | np.isnan(w) | np.isinf(w) | (w < 0)
-            if raise_if_nans and np.sum(invalid):
-                raise ValueError('x or w contains invalid values (nan or infinity).')
+            if handling_invalid == HandlingInvalid.Raise and np.sum(invalid):
+                raise ValueError('x or w contains invalid values (nan, infinity or negative weight).')
             else:
                 x = x[~invalid]
                 w = w[~invalid]
@@ -157,7 +196,48 @@ class TDigest:
         else:
             raise TypeError("Values are unrecognized type.")
 
+    @staticmethod
+    def compute(x: Union[Number, np.ndarray, pd.Series],
+                w: Optional[Union[Number, np.ndarray, pd.Series]] = None,
+                handling_invalid: HandlingInvalid = HandlingInvalid.Drop,
+                compression: int = 100) -> TDigest:
+        """Estimate TDigest directly from data.
+
+        Args:
+            x: Values to calculate the distribution of.
+            w: Optional weight for the values. If it is np.ndarray or pd.Series, it has to have the same
+                (one-dimensional) shape as x.
+            handling_invalid: How to handle invalid values in calculation ['drop', 'raise'], default value
+                'drop'. Provided either as enum or its string representation. The
+            compression: Higher compression value leads to more precise results and larger memory requirements.
+                Compression gives a maximum number of centroids of the internal representation after merging
+                of the TDigest. Unmerged representation can have up to roughly six times as many centroids.
+
+        Returns:
+            New TDigest object estimated based on (possibly weighted) data.
+
+        Raises:
+            TypeError: If x or w are not of permitted types or of different types.
+            ValueError: If handling_invalid is 'raise' and there are invalid values in data (nan, infinity,
+                negative weight).
+        """
+        td = TDigest(compression=compression)
+        td.update(x, w, handling_invalid=handling_invalid)
+        return td
+
     def cdf(self, at: Union[Number, List, np.ndarray]) -> Union[float, np.ndarray]:
+        """Calculate approximate values of empirical cumulative distribution function (CDF) at given points.
+
+        Args:
+            at: values at which the CDF should be calculated.
+
+        Returns:
+            Values of CDF calculated at given points.
+
+        Raises:
+            TypeError: If `at` is of invalid type.
+
+        """
         if isinstance(at, list):
             at = np.array(at)
         if isinstance(at, Number):
@@ -172,6 +252,19 @@ class TDigest:
             raise TypeError("At parameter is unrecognized type.")
 
     def inverse_cdf(self, quantile: Union[Number, List, np.ndarray]) -> Union[float, np.ndarray]:
+        """Calculate quantiles at given points (quantiles are just inverse of cumulative distribution function).
+
+        Args:
+            quantile: The values where the inverse CDF should be calculated. Multiple values are passed to C library
+                for fast estimation of larger number of quantiles.
+
+        Returns:
+            Estimated approximate quantiles.
+
+        Raises:
+            TypeError: If `quantile` is of invalid type.
+
+        """
         if isinstance(quantile, list):
             quantile = np.array(quantile)
         if isinstance(quantile, Number):
@@ -214,7 +307,8 @@ class TDigest:
     def __repr__(self) -> str:
         return self.__str__()
 
-    def get_centroid(self, i):
+    def get_centroid(self, i: int):
+        """Get the centroid (i.e. a tuple of mean and weight) at a given index of the underlying representation."""
         if i >= self._num_merged + self._num_unmerged:
             raise IndexError(f'Cannot access centroid at index {i}, TDigest has only'
                              f' {self._num_merged + self._num_unmerged} centroids.')
@@ -222,31 +316,22 @@ class TDigest:
         return centroid.contents.mean, centroid.contents.weight
 
     def get_centroids(self):
+        """Get all centroids as a two-dimensional array. Based on the centroids, the TDigest can be fully
+        reconstructed (for a given compression). Conversion to centroids and back can be used for serialization.
+        """
         self.force_merge()
         centroids = np.empty(2 * self._num_merged, dtype='float')
         _lib.td_get_centroids(self._tdigest, centroids)
         return centroids.reshape([-1, 2])
 
     def force_merge(self):
+        """Force merging of centroids of the underlying representation."""
         _lib.merge(self._tdigest)
-
-    # @staticmethod
-    # def of_centroids(centroids: np.ndarray, compression: float = 100):
-    #     if centroids.ndim != 2 or centroids.shape[1] != 2:
-    #         raise TypeError('Centroids have to be 2-dimensional np.array with 2 columns (means and weights)')
-    #     if centroids.shape[0] > 6 * compression + 10:
-    #         raise TypeError(f'Num of centroids {centroids.shape[0]} is too large for TDigest with '
-    #                         f'compression {compression}.')
-    #     elif centroids.shape[0] > compression:
-    #         print(f'Num of centroids seems large.')
-    #     _tdigest = _tdigest_dll.td_of_centroids(compression, centroids.shape[0], centroids.reshape(-1))
-    #     td = TDigest(compression)
-    #     _tdigest_dll.td_free(td._tdigest)
-    #     td._tdigest = _tdigest
-    #     return td
 
     @staticmethod
     def of_centroids(centroids: np.ndarray, compression: float = 100):
+        """Reconstruct TDigest of the centroids and a given compression.
+        """
         if centroids.ndim != 2 or centroids.shape[1] != 2:
             raise TypeError('Centroids have to be 2-dimensional np.array with 2 columns (means and weights)')
         if centroids.shape[0] > 6 * compression + 10:
@@ -260,6 +345,8 @@ class TDigest:
 
     @staticmethod
     def combine(first: Union[TDigest, Iterable[TDigest]], second: Optional[TDigest] = None) -> TDigest:
+        """Combine multiple TDigests together.
+        """
         if second is None:
             if isinstance(first, pd.Series):
                 first = first.values
@@ -276,14 +363,18 @@ class TDigest:
             return first + second
 
     def scale_weight(self, factor):
+        """Scale weight by a certain factor. Can be used for instance to estimate exponentially decaying approximate
+        quantiles."""
         _lib.td_scale_weight(self._tdigest, float(factor))
 
     @property
     def weight(self):
+        """Total weight of the data."""
         return _lib.td_total_weight(self._tdigest)
 
     @property
     def mean(self):
+        """Exact mean of the data."""
         if self.weight == 0:
             return np.nan
         else:
