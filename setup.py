@@ -19,13 +19,16 @@ class _build_ext_ctypes(_build_ext_distutils):
 
     def get_ext_filename(self, ext_name):
         if self._ctypes:
-            return ext_name + '.so'
+            if os.name == 'nt':
+                return ext_name + '.dll'
+            else:
+                return ext_name + '.so'
         return super().get_ext_filename(ext_name)
 
 
 setup(
       name='pytdigest',
-      version='0.0.7',
+      version='0.1.0',
       description='Python package for *fast* TDigest calculation.',
       #py_modules=['pytdigest'],
       ext_modules=[CTypesExtension(

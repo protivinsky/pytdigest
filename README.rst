@@ -21,6 +21,11 @@ Based on previous work of Ted Dunning and Andrew Werner.
 - https://github.com/tdunning/t-digest
 - https://github.com/ajwerner/tdigestc
 
+:: warning::
+    The package relies on C implementation that is compiled on host machine. I tested the compilation on Linux and
+    on Windows 11, but I cannot ensure the compatibility with all operating system. Let me know if you have encountered
+    any issues.
+
 Basic example
 -------------
 
