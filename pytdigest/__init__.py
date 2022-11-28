@@ -168,11 +168,11 @@ There are several improvements that can be done in the future:
 
 - TDigest can calculate exact variance in addition to mean.
 - Alternating merging procedure (the centroids are always merged left to right in the C implementation,
-however Ted Dunning states that alternating merging improves the precision).
+    however Ted Dunning states that alternating merging improves the precision).
 - Scaling function for merging centroids is hard-coded at the moment. Ted Dunning mentions several
-possible functions that can be used in merging.
+    possible functions that can be used in merging.
 - Centroids can store information about their variance - the resulting TDigest should be still
-composable and fast and it can work much better for discrete distributions.
+    composable and fast and it can work much better for discrete distributions.
 
 Documentation
 -------------
