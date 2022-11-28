@@ -59,8 +59,6 @@ void td_shift(tdigest_t *h, double shift);
 #define M_PI 3.14159265358979323846
 
 /* TODO:
- * - python wrappers
- * - array processing functionality
  * - add variance, min, max
  * - add alternating merging procedure (should be simple, just remember what you did the last time)
  *   - actually, I need to be careful as some functions likely assume the centroids are sorted
@@ -68,7 +66,6 @@ void td_shift(tdigest_t *h, double shift);
  *   - well not really, I would need to transform cdf and icdf - maybe simple anyway?
  * - extract scale function and allow to use a different one?
  * - add scaling of volatility?
- * - some testing and benchmarking, so I can see impact of changes
  */
 
 

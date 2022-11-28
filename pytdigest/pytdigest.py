@@ -72,9 +72,6 @@ _lib.td_inverse_cdf_batch.argtypes = [
     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
 ]
 
-# _tdigest_dll.td_copy.argtypes = [ctypes.POINTER(_TDigest)]
-# _tdigest_dll.td_copy.restype = ctypes.POINTER(_TDigest)
-
 _lib.td_merge.argtypes = [ctypes.POINTER(_TDigest), ctypes.POINTER(_TDigest)]
 
 _lib.td_total_weight.argtypes = [ctypes.POINTER(_TDigest)]

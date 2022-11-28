@@ -61,7 +61,7 @@ Copyright (c) 2022 Tomas Protivinsky, All rights reserved.
 
 
 from .pytdigest import TDigest, HandlingInvalid
+from .version import VERSION as __version__
 
 __all__ = ['TDigest', 'HandlingInvalid']
 __author__ = 'Tomas Protivinsky'
-__version__ = "0.0.6"

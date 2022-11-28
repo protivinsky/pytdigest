@@ -1,8 +1,11 @@
-|doc-badge|
+|pytest-badge| |doc-badge|
 
-..  |doc-badge| image:: https://github.com/protivinsky/omoment/actions/workflows/builddoc.yaml/badge.svg
+..  |pytest-badge| image:: https://github.com/protivinsky/pytdigest/actions/workflows/pytest.yaml/badge.svg
     :alt: pytest
-    :target: https://protivinsky.github.io/omoment/index.html
+
+..  |doc-badge| image:: https://github.com/protivinsky/pytdigest/actions/workflows/builddoc.yaml/badge.svg
+    :alt: doc
+    :target: https://protivinsky.github.io/pytdigest/index.html
 
 PyTDigest: Fast streaming calculation of approximate quantiles
 ==============================================================
@@ -50,6 +53,129 @@ Basic example
 
     # and multiple TDigests can be added together to provide approximate quantiles for the overall dataset
     td + td2
+
+Performance
+-----------
+
+Ted Dunning's original algorithm in Java takes about ~140 ns per addition on average. This package needs about ~200 ns
+per addition when called from Python on numpy arrays, so the performance is fairly comparable with the original
+implementation. All other tested TDigest implementations in Python are much slower.
+
+.. code:: python
+
+    import numpy as np
+    from pytdigest import TDigest
+    import time
+
+    rng = np.random.Generator(np.random.PCG64(12345))
+
+    for n in [100_000, 1_000_000, 10_000_000]:
+        x = rng.normal(size=n)
+        w = rng.exponential(size=n)
+
+        start = time.time()
+        td = TDigest.compute(x, w)
+        end = time.time()
+        print(f'PyTDigest, n = {n:,}: {end - start:.3g} seconds')
+
+    # PyTDigest, n = 100,000: 0.0222 seconds
+    # PyTDigest, n = 1,000,000: 0.21 seconds
+    # PyTDigest, n = 10,000,000: 2.02 seconds
+
+Similar packages
+----------------
+
+Several Python packages or wrappers exist for the TDigest algorithm.
+
+tdigest
+.......
+
+The most popular on GitHub is a pure Python
+`tdigest package
+<https://github.com/CamDavidsonPilon/tdigest>`_. Pure Python implementation is indeed very slow – more than 100x
+slower than this package:
+
+.. code:: python
+
+    import numpy as np
+    from pytdigest import TDigest
+    from tdigest import TDigest as TDigestPython
+    import time
+
+    rng = np.random.Generator(np.random.PCG64(12345))
+    n = 100_000
+    x = rng.normal(size=n)
+    w = rng.exponential(size=n)
+
+    start = time.time()
+    td = TDigest.compute(x, w)
+    end = time.time()
+    print(f'PyTDigest: {end - start:.3g} seconds')
+    # PyTDigest: 0.0246 seconds
+
+    tdp = TDigestPython()
+    start = time.time()
+    tdp.batch_update(x)
+    end = time.time()
+    print(f'TDigest: {end - start:.3g} seconds')
+    # TDigest: 7.26 seconds
+
+Different weights for can be used in tdigest only with `update` method for adding a single observation.
+
+t-digest CFFI
+.............
+
+Other package is `t-digest CFFI
+<https://github.com/kpdemetriou/tdigest-cffi>`_, a thin Python wrapper over C implementation. It does not pass
+batch updates into the C layer, so the iteration has to be done in python:
+
+.. code:: python
+
+    import numpy as np
+    from tdigest import TDigest as TDigestCFFI
+    import time
+
+    rng = np.random.Generator(np.random.PCG64(12345))
+    n = 100_000
+    x = rng.normal(size=n)
+
+    tdcffi = TDigestCFFI()
+    start = time.time()
+    for xx in x:
+        tdcffi.insert(xx)
+    end = time.time()
+    print(f'TDigest-CFFI: {end - start:.3g} seconds')
+
+Hence this package is still almost 20x slower than this package when used over numpy arrays. In addition, t-digest CFFI
+package allows only for integer weights.
+
+qtdigest
+........
+
+`qtdigest
+<https://github.com/QunarOPS/qtdigest>`_ own benchmarking states that 100 000 additions take about 1.7 s, so it is
+again almost 100x slower than this package.
+
+tdigestc
+........
+
+`tdigestc
+<https://github.com/ajwerner/tdigestc>`_ by ajwerner is the a simple C implementation with wrappers for different
+languages. The Python wrapper is very basic, it is not published on PyPI and some functionality was missing
+in the underlying C implementation (for instance support for batch updates based on numpy arrays), so I took this
+package as the starting point and added several useful features for use as a standalone Python package.
+
+Future plans
+------------
+
+There are several improvements that can be done in the future:
+- TDigest can calculate exact variance in addition to mean.
+- Alternating merging procedure (the centroids are always merged left to right in the C implementation,
+however Ted Dunning states that alternating merging improves the precision).
+- Scaling function for merging centroids is hard-coded at the moment. Ted Dunning mentions several
+possible functions that can be used in merging.
+- Centroids can store information about their variance - the resulting TDigest should be still
+composable and fast and it can work much better for discrete distributions.
 
 Documentation
 -------------
