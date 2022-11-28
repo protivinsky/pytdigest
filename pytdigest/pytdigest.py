@@ -11,7 +11,6 @@
 # Copyright (c) 2022 Tomas Protivinsky, All rights reserved.
 #      https://github.com/protivinsky/pytdigest
 
-
 from __future__ import annotations
 import numpy as np
 from numpy.ctypeslib import ndpointer
@@ -167,7 +166,7 @@ class TDigest:
                 elif not isinstance(w, Number):
                     raise TypeError('If x is a single number, w has to be too.')
                 elif np.isfinite(w):
-                    _lib.td_add(self._tdigest, float(x), w)
+                    _lib.td_add(self._tdigest, float(x), float(w))
                 elif handling_invalid == HandlingInvalid.Raise:
                     raise ValueError("w is invalid.")
             elif handling_invalid == HandlingInvalid.Raise:
@@ -180,6 +179,7 @@ class TDigest:
             elif isinstance(w, np.ndarray):
                 if w.size != x.size:
                     raise TypeError("w has to be of the same size as values.")
+                w = w.astype('float')
             else:
                 raise TypeError("Weights are unrecognized type.")
             invalid = np.isnan(x) | np.isinf(x) | np.isnan(w) | np.isinf(w) | (w < 0)

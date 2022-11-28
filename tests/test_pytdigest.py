@@ -4,6 +4,7 @@ import pytest
 import numpy as np
 import pandas as pd
 import math
+from copy import copy
 from statsmodels.stats.weightstats import DescrStatsW
 from pytdigest import TDigest, HandlingInvalid
 
@@ -15,18 +16,24 @@ from pytdigest import TDigest, HandlingInvalid
 
 def test_basic_operations():
     td = TDigest.compute(100, 10)
+    # TDigest is constructed and has the correct properties
     assert math.isclose(td.mean, 100)
     assert math.isclose(td.weight, 10)
     td.update(0, 10)
+    # update works as expected
     assert math.isclose(td.mean, 50)
     assert math.isclose(td.weight, 20)
-    td2 = td.copy()
+    td2 = copy(td)
     td += td2
+    # ensure that addition works and copy produces different objects
     assert math.isclose(td.mean, 50)
     assert math.isclose(td.weight, 40)
+    assert math.isclose(td2.weight, 20)
+    assert id(td) != id(td2)
     td.scale_weight(0.5)
+    # scale_weight works
     assert math.isclose(td.mean, 50)
-    assert math.isclose(td.weight, 40)
+    assert math.isclose(td.weight, 20)
 
 
 def test_to_centroids_and_back():
@@ -61,8 +68,8 @@ def test_correct_calculation():
     td_qs = td.inverse_cdf(quantiles)
     assert math.isclose(np_mean, td.mean)
     for q1, q2 in zip(np_qs, td_qs):
-        # might need to increase the tolerance here
-        assert math.isclose(q1, q2)
+        # TDigest quantiles are only approximate, so need higher tolerance
+        assert math.isclose(q1, q2, rel_tol=1e-3)
 
 
 def test_correct_weighted_calculation():
@@ -78,7 +85,7 @@ def test_correct_weighted_calculation():
     dsw_qs = dsw.quantile(quantiles)  # [dsw.quantile(q) for q in quantiles]
     for q1, q2 in zip(dsw_qs, td_qs):
         # might need to increase the tolerance here
-        assert math.isclose(q1, q2)
+        assert math.isclose(q1, q2, rel_tol=1e-3)
 
 
 def test_cdf():
@@ -91,7 +98,7 @@ def test_cdf():
 
 @pytest.fixture
 def df():
-    rng = np.random.Generator(np.random.PCG64(99999))
+    rng = np.random.Generator(np.random.PCG64(12345))
     n = 100_000
     g = rng.integers(low=1, high=11, size=n)
     x = 10 * g + rng.normal(loc=0, scale=50, size=n)
@@ -100,8 +107,8 @@ def df():
 
 
 def test_combine(df):
-    td_all = TDigest.compute(df['x'], df['w'])
-    td_per_group = df.groupby('g').apply(lambda frame: TDigest.compute(frame['x'], frame['w']))
+    td_all = TDigest.compute(df['x'], df['w'], compression=1_000)
+    td_per_group = df.groupby('g').apply(lambda frame: TDigest.compute(frame['x'], frame['w'], compression=1_000))
     td_from_groups = TDigest.combine(td_per_group)
     # TODO: might need to increase the tolerance as the quantiles are approximate only
     assert math.isclose(td_all.mean, td_from_groups.mean)
@@ -110,4 +117,4 @@ def test_combine(df):
     qs1 = td_all.inverse_cdf(quantiles)
     qs2 = td_from_groups.inverse_cdf(quantiles)
     for q1, q2 in zip(qs1, qs2):
-        assert math.isclose(q1, q2)
+        assert math.isclose(q1, q2, rel_tol=5e-3)
