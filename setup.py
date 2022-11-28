@@ -1,7 +1,7 @@
 import os
 from distutils.command.build_ext import build_ext as _build_ext_distutils
 from setuptools import find_packages, setup, Extension
-from .pytdigest.version import VERSION as _pytdigest_version
+
 
 class CTypesExtension(Extension): pass
 
@@ -25,7 +25,7 @@ class _build_ext_ctypes(_build_ext_distutils):
 
 setup(
       name='pytdigest',
-      version=_pytdigest_version,
+      version='0.0.7',
       description='Python package for *fast* TDigest calculation.',
       #py_modules=['pytdigest'],
       ext_modules=[CTypesExtension(
