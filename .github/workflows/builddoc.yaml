@@ -16,6 +16,7 @@ jobs:
         run: |
           pip install sphinx sphinx_rtd_theme numpy pandas
       - name: Build C lib
+        run: |
           gcc pytdigest/tdigest.c -shared -o pytdigest/tdigest.so
       - name: Sphinx build
         run: |
