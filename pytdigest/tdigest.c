@@ -141,7 +141,7 @@ static tdigest_t *td_init(double delta, size_t buf_size, char *buf) {
     if (!td) {
         return NULL;
     }
-    bzero((void *) (td), buf_size);
+    memset((void *) (td), 0, buf_size);
     *td = (tdigest_t) {
             .delta = delta,
             .max_centroids = (buf_size - sizeof(tdigest_t)) / sizeof(centroid_t),
@@ -172,7 +172,7 @@ void td_merge(tdigest_t *into, tdigest_t *from) {
 }
 
 void td_reset(tdigest_t *td) {
-    bzero((void *) (&td->centroids[0]), sizeof(centroid_t) * td->max_centroids);
+    memset((void *) (&td->centroids[0]), 0, sizeof(centroid_t) * td->max_centroids);
     td->num_merged = 0;
     td->merged_weight = 0;
     td->num_unmerged = 0;
