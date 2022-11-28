@@ -158,7 +158,7 @@ qtdigest
 ........
 
 `qtdigest
-<https://github.com/QunarOPS/qtdigest>`_ own benchmarking states that 100 000 additions take about 1.7 s, so it is
+<https://github.com/QunarOPS/qtdigest>`_'s own benchmarking states that 100 000 additions take about 1.7 s, so it is
 again almost 100x slower than this package.
 
 tdigestc
