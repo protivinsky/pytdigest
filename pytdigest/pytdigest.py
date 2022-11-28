@@ -23,7 +23,10 @@ from enum import Enum
 
 
 _path = os.path.dirname(os.path.realpath(__file__))
-_lib = ctypes.CDLL(os.path.join(_path, 'tdigest.so'))
+if os.name == 'nt':
+    _lib = ctypes.CDLL(os.path.join(_path, 'tdigest.dll'))
+else:
+    _lib = ctypes.CDLL(os.path.join(_path, 'tdigest.so'))
 
 class _Centroid(ctypes.Structure):
     _fields_ = [("mean", ctypes.c_double), ("weight", ctypes.c_double)]
