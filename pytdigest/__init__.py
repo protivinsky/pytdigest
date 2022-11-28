@@ -156,7 +156,7 @@ tdigestc
 ........
 
 `tdigestc
-<https://github.com/ajwerner/tdigestc>`_ by ajwerner is the a simple C implementation with wrappers for different
+<https://github.com/ajwerner/tdigestc>`_ by ajwerner is a simple C implementation with wrappers for different
 languages. The Python wrapper is very basic, it is not published on PyPI and some functionality was missing
 in the underlying C implementation (for instance support for batch updates based on numpy arrays), so I took this
 package as the starting point and added several useful features for use as a standalone Python package.
@@ -165,6 +165,7 @@ Future plans
 ------------
 
 There are several improvements that can be done in the future:
+
 - TDigest can calculate exact variance in addition to mean.
 - Alternating merging procedure (the centroids are always merged left to right in the C implementation,
 however Ted Dunning states that alternating merging improves the precision).
