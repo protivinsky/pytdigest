@@ -1,6 +1,6 @@
 .. PyTDigest documentation master file
 
-PyTDigest: Fast and streaming approximate quantile calculation
+PyTDigest: Fast streaming calculation of approximate quantiles
 ==============================================================
 
 .. automodule:: pytdigest
