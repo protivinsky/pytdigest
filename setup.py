@@ -26,10 +26,14 @@ class _build_ext_ctypes(_build_ext_distutils):
         return super().get_ext_filename(ext_name)
 
 
+with open('README.rst') as f:
+    readme = f.read()
+
 setup(
       name='pytdigest',
-      version='0.1.0',
+      version='0.1.1',
       description='Python package for *fast* TDigest calculation.',
+      long_description=readme,
       #py_modules=['pytdigest'],
       ext_modules=[CTypesExtension(
             name=os.path.join('pytdigest', 'tdigest'),
@@ -59,7 +63,8 @@ setup(
       #package_dir={"": "pytdigest"},
       packages=find_packages(where="."),  # Required
       project_urls={  # Optional
-            "Source": "https://github.com/protivinsky/pytdigest",
+            "Homepage": "https://github.com/protivinsky/pytdigest",
+            "Documentation": "https://protivinsky.github.io/pytdigest",
       },
 )
 

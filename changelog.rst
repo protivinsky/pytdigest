@@ -1,6 +1,11 @@
 Changelog
 =========
 
+Version 0.1.1 (2022-11-28)
+--------------------------
+
+* Providing long description for PyPI repository
+
 Version 0.1.0 (2022-11-28)
 --------------------------
 
