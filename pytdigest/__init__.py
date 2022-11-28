@@ -1,9 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
-PyTDigest: Fast streaming calculation of approximate quantiles
-==============================================================
-
 Python package for **fast** TDigest calculation.
 
 - C implementation and thin Python wrapper
