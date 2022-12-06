@@ -241,10 +241,13 @@ DLL_EXPORT void merge(tdigest_t *td) {
     double weight_so_far = 0;
     for (int i = 1; i < num_centroids; i++) {
         double proposed_weight = td->centroids[cur].weight + td->centroids[i].weight;
+        bool weight_too_small = (td->centroids[cur].weight < 1e-200) || (td->centroids[i].weight < 1e-200);
         double z = proposed_weight * normalizer;
         double q0 = weight_so_far / total_weight;
         double q2 = (weight_so_far + proposed_weight) / total_weight;
-        bool should_add = (z <= (q0 * (1 - q0))) && (z <= (q2 * (1 - q2)));
+        // bool should_add = (z <= (q0 * (1 - q0))) && (z <= (q2 * (1 - q2)));
+        // hack to avoid underflow when scaling weights (exp decay)
+        bool should_add = (z <= (q0 * (1 - q0))) && (z <= (q2 * (1 - q2))) || weight_too_small;
         if (should_add) {
             td->centroids[cur].weight += td->centroids[i].weight;
             double diff = td->centroids[i].mean - td->centroids[cur].mean;
