@@ -199,4 +199,4 @@ from .pytdigest import TDigest, HandlingInvalid
 
 __all__ = ['TDigest', 'HandlingInvalid']
 __author__ = 'Tomas Protivinsky'
-__version__ = '0.1.2'
+__version__ = '0.1.3'

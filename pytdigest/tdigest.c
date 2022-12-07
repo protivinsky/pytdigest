@@ -117,6 +117,10 @@ static bool is_very_small(double val) {
     return !(val > .000000001 || val < -.000000001);
 }
 
+static bool is_close(double x, double y, double abs_tol, double rel_tol) {
+        return fabs(x - y) <= fmax(abs_tol, rel_tol * fabs(x - y));
+}
+
 static int get_max_centroids(double delta) {
     // do I want to allow for parameterization here?
     return (6 * (int) (delta)) + 10;
@@ -242,12 +246,13 @@ DLL_EXPORT void merge(tdigest_t *td) {
     for (int i = 1; i < num_centroids; i++) {
         double proposed_weight = td->centroids[cur].weight + td->centroids[i].weight;
         bool weight_too_small = (td->centroids[cur].weight < 1e-200) || (td->centroids[i].weight < 1e-200);
+        bool equal_means = is_close(td->centroids[cur].mean, td->centroids[i].mean, 1e-100, 1e-10);
         double z = proposed_weight * normalizer;
         double q0 = weight_so_far / total_weight;
         double q2 = (weight_so_far + proposed_weight) / total_weight;
         // bool should_add = (z <= (q0 * (1 - q0))) && (z <= (q2 * (1 - q2)));
         // hack to avoid underflow when scaling weights (exp decay)
-        bool should_add = (z <= (q0 * (1 - q0))) && (z <= (q2 * (1 - q2))) || weight_too_small;
+        bool should_add = (z <= (q0 * (1 - q0))) && (z <= (q2 * (1 - q2))) || weight_too_small || equal_means;
         if (should_add) {
             td->centroids[cur].weight += td->centroids[i].weight;
             double diff = td->centroids[i].mean - td->centroids[cur].mean;
