@@ -141,6 +141,7 @@ batch updates into the C layer, so the iteration has to be done in python:
         tdcffi.insert(xx)
     end = time.time()
     print(f'TDigest-CFFI: {end - start:.3g} seconds')
+    # TDigest-CFFI: 0.479 seconds
 
 Hence, this package is still almost 20x slower than this package when used over numpy arrays. In addition, t-digest CFFI
 package allows only for integer weights.
