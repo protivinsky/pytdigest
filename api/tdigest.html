@@ -1,0 +1,399 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>TDigest &mdash; PyTDigest 0.6.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="prev" title="PyTDigest: Fast streaming calculation of approximate quantiles" href="../index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> PyTDigest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">TDigest</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pytdigest.TDigest"><code class="docutils literal notranslate"><span class="pre">TDigest</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.cdf"><code class="docutils literal notranslate"><span class="pre">TDigest.cdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.combine"><code class="docutils literal notranslate"><span class="pre">TDigest.combine()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.compute"><code class="docutils literal notranslate"><span class="pre">TDigest.compute()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.force_merge"><code class="docutils literal notranslate"><span class="pre">TDigest.force_merge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.get_centroid"><code class="docutils literal notranslate"><span class="pre">TDigest.get_centroid()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.get_centroids"><code class="docutils literal notranslate"><span class="pre">TDigest.get_centroids()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.inverse_cdf"><code class="docutils literal notranslate"><span class="pre">TDigest.inverse_cdf()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.mean"><code class="docutils literal notranslate"><span class="pre">TDigest.mean</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.of_centroids"><code class="docutils literal notranslate"><span class="pre">TDigest.of_centroids()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.scale_weight"><code class="docutils literal notranslate"><span class="pre">TDigest.scale_weight()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.std_dev"><code class="docutils literal notranslate"><span class="pre">TDigest.std_dev</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.update"><code class="docutils literal notranslate"><span class="pre">TDigest.update()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.var"><code class="docutils literal notranslate"><span class="pre">TDigest.var</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.variance"><code class="docutils literal notranslate"><span class="pre">TDigest.variance</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#pytdigest.TDigest.weight"><code class="docutils literal notranslate"><span class="pre">TDigest.weight</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">PyTDigest</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>TDigest</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com/protivinsky/pytdigest/blob/main/doc/api/tdigest.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="tdigest">
+<h1>TDigest<a class="headerlink" href="#tdigest" title="Permalink to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="pytdigest.TDigest">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pytdigest.</span></span><span class="sig-name descname"><span class="pre">TDigest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pytdigest.TDigest" title="Permalink to this definition">¶</a></dt>
+<dd><p>TDigest can estimate an approximate empirical distribution in a single pass through data. Multiple TDigest
+calculated of chunks of data can be combined to obtain approximate distribution of the overall dataset.
+Estimated distribution can be then used to compute approximate empirical CDF (cumulative distribution function)
+or inverse CDF (quantiles).</p>
+<p>The precision of the estimation is controlled by <cite>compression</cite> parameter.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pytdigest.TDigest.cdf">
+<span class="sig-name descname"><span class="pre">cdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">at</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Number</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="headerlink" href="#pytdigest.TDigest.cdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate approximate values of empirical cumulative distribution function (CDF) at given points.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>at</strong> – values at which the CDF should be calculated.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Values of CDF calculated at given points.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>TypeError</strong> – If <cite>at</cite> is of invalid type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pytdigest.TDigest.combine">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">combine</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">first</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pytdigest.TDigest" title="pytdigest.pytdigest.TDigest"><span class="pre">TDigest</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pytdigest.TDigest" title="pytdigest.pytdigest.TDigest"><span class="pre">TDigest</span></a><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#pytdigest.TDigest" title="pytdigest.pytdigest.TDigest"><span class="pre">TDigest</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pytdigest.TDigest" title="pytdigest.pytdigest.TDigest"><span class="pre">TDigest</span></a></span></span><a class="headerlink" href="#pytdigest.TDigest.combine" title="Permalink to this definition">¶</a></dt>
+<dd><p>Combine multiple TDigests together.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pytdigest.TDigest.compute">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">compute</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Number</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Number</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handling_invalid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">HandlingInvalid</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">HandlingInvalid.Drop</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#pytdigest.TDigest" title="pytdigest.pytdigest.TDigest"><span class="pre">TDigest</span></a></span></span><a class="headerlink" href="#pytdigest.TDigest.compute" title="Permalink to this definition">¶</a></dt>
+<dd><p>Estimate TDigest directly from data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Values to calculate the distribution of.</p></li>
+<li><p><strong>w</strong> – Optional weight for the values. If it is np.ndarray or pd.Series, it has to have the same
+(one-dimensional) shape as x.</p></li>
+<li><p><strong>handling_invalid</strong> – How to handle invalid values in calculation [‘drop’, ‘raise’], default value
+‘drop’. Provided either as enum or its string representation. The</p></li>
+<li><p><strong>compression</strong> – Higher compression value leads to more precise results and larger memory requirements.
+Compression gives a maximum number of centroids of the internal representation after merging
+of the TDigest. Unmerged representation can have up to roughly six times as many centroids.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>New TDigest object estimated based on (possibly weighted) data.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>TypeError</strong> – If x or w are not of permitted types or of different types.</p></li>
+<li><p><strong>ValueError</strong> – If handling_invalid is ‘raise’ and there are invalid values in data (nan, infinity,
+    negative weight).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pytdigest.TDigest.force_merge">
+<span class="sig-name descname"><span class="pre">force_merge</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pytdigest.TDigest.force_merge" title="Permalink to this definition">¶</a></dt>
+<dd><p>Force merging of centroids of the underlying representation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pytdigest.TDigest.get_centroid">
+<span class="sig-name descname"><span class="pre">get_centroid</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">i</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pytdigest.TDigest.get_centroid" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the centroid (i.e. a tuple of mean and weight) at a given index of the underlying representation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pytdigest.TDigest.get_centroids">
+<span class="sig-name descname"><span class="pre">get_centroids</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pytdigest.TDigest.get_centroids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all centroids as a two-dimensional array. Based on the centroids, the TDigest can be fully
+reconstructed (for a given compression). Conversion to centroids and back can be used for serialization.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pytdigest.TDigest.inverse_cdf">
+<span class="sig-name descname"><span class="pre">inverse_cdf</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">quantile</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Number</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">List</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span></span></span><a class="headerlink" href="#pytdigest.TDigest.inverse_cdf" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculate quantiles at given points (quantiles are just inverse of cumulative distribution function).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>quantile</strong> – The values where the inverse CDF should be calculated. Multiple values are passed to C library
+for fast estimation of larger number of quantiles.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Estimated approximate quantiles.</p>
+</dd>
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>TypeError</strong> – If <cite>quantile</cite> is of invalid type.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pytdigest.TDigest.mean">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">mean</span></span><a class="headerlink" href="#pytdigest.TDigest.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exact mean of the data.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pytdigest.TDigest.of_centroids">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">of_centroids</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">centroids</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ndarray</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">compression</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pytdigest.TDigest.of_centroids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reconstruct TDigest of the centroids and a given compression.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pytdigest.TDigest.scale_weight">
+<span class="sig-name descname"><span class="pre">scale_weight</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">factor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pytdigest.TDigest.scale_weight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Scale weight by a certain factor. Can be used for instance to estimate exponentially decaying approximate
+quantiles.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pytdigest.TDigest.std_dev">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">std_dev</span></span><a class="headerlink" href="#pytdigest.TDigest.std_dev" title="Permalink to this definition">¶</a></dt>
+<dd><p>Standard deviation, not corrected for doff.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pytdigest.TDigest.update">
+<span class="sig-name descname"><span class="pre">update</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Number</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">w</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Number</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">ndarray</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Series</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handling_invalid</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">HandlingInvalid</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">HandlingInvalid.Drop</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pytdigest.TDigest.update" title="Permalink to this definition">¶</a></dt>
+<dd><p>Add new data to TDigest.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x</strong> – Values to calculate the distribution of.</p></li>
+<li><p><strong>w</strong> – Optional weight for the values. If it is np.ndarray or pd.Series, it has to have the same
+(one-dimensional) shape as x.</p></li>
+<li><p><strong>handling_invalid</strong> – How to handle invalid values in calculation [‘drop’, ‘raise’], default value
+‘drop’. Provided either as enum or its string representation. The</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If x or w are not of permitted types or of different types.</p></li>
+<li><p><strong>ValueError</strong> – If handling_invalid is ‘raise’ and there are invalid values in data (nan, infinity,
+    negative weight).</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pytdigest.TDigest.var">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">var</span></span><a class="headerlink" href="#pytdigest.TDigest.var" title="Permalink to this definition">¶</a></dt>
+<dd><p>Alias for variance.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pytdigest.TDigest.variance">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">variance</span></span><a class="headerlink" href="#pytdigest.TDigest.variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exact variance of the data (biased, i.e. normalized by total weight without doff correction).</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pytdigest.TDigest.weight">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">weight</span></span><a class="headerlink" href="#pytdigest.TDigest.weight" title="Permalink to this definition">¶</a></dt>
+<dd><p>Total weight of the data.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="../index.html" class="btn btn-neutral float-left" title="PyTDigest: Fast streaming calculation of approximate quantiles" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2022, Tomas Protivinsky.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

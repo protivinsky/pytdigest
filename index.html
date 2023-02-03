@@ -1,0 +1,405 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="Docutils 0.19: https://docutils.sourceforge.io/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  
+  <title>PyTDigest: Fast streaming calculation of approximate quantiles &mdash; PyTDigest 0.6.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+
+  
+  
+
+  
+  
+
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/sphinx_highlight.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="TDigest" href="api/tdigest.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="#" class="icon icon-home"> PyTDigest
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/tdigest.html">TDigest</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">PyTDigest</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="#" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>PyTDigest: Fast streaming calculation of approximate quantiles</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            
+              <a href="https://github.com/protivinsky/pytdigest/blob/main/doc/index.rst" class="fa fa-github"> Edit on GitHub</a>
+            
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <section id="module-pytdigest">
+<span id="pytdigest-fast-streaming-calculation-of-approximate-quantiles"></span><h1>PyTDigest: Fast streaming calculation of approximate quantiles<a class="headerlink" href="#module-pytdigest" title="Permalink to this heading">¶</a></h1>
+<p>Python package for <strong>fast</strong> TDigest calculation.</p>
+<ul class="simple">
+<li><p>C implementation and thin Python wrapper</p></li>
+<li><p>suitable for big data and streaming and distributed settings</p></li>
+<li><p>developed for smooth compatibility with Pandas and numpy</p></li>
+</ul>
+<p>Based on previous work of Ted Dunning and Andrew Werner.</p>
+<ul class="simple">
+<li><p><a class="reference external" href="https://github.com/tdunning/t-digest">https://github.com/tdunning/t-digest</a></p></li>
+<li><p><a class="reference external" href="https://github.com/ajwerner/tdigestc">https://github.com/ajwerner/tdigestc</a></p></li>
+</ul>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The package relies on C implementation that is compiled on host machine. I tested the compilation on Linux and
+on Windows 11, but I cannot ensure the compatibility with all operating systems. Let me know if you have encountered
+any issues.</p>
+</div>
+<section id="basic-example">
+<h2>Basic example<a class="headerlink" href="#basic-example" title="Permalink to this heading">¶</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pytdigest</span> <span class="kn">import</span> <span class="n">TDigest</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="mi">12354</span><span class="p">)</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">100_000</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">loc</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">scale</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+
+<span class="c1"># estimation from data is simple:</span>
+<span class="n">td</span> <span class="o">=</span> <span class="n">TDigest</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">compression</span><span class="o">=</span><span class="mi">1_000</span><span class="p">)</span>
+<span class="c1"># td now contains &quot;compressed&quot; distribution: centroids with their means and weights</span>
+
+<span class="c1"># TDigest can be used to provide mean, variance or approximate quantiles (i.e. inverse CDF):</span>
+<span class="n">td</span><span class="o">.</span><span class="n">mean</span>
+<span class="n">quantiles</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.01</span><span class="p">,</span> <span class="mf">0.05</span><span class="p">,</span> <span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.99</span><span class="p">,</span> <span class="mf">1.</span><span class="p">]</span>
+<span class="n">td</span><span class="o">.</span><span class="n">inverse_cdf</span><span class="p">(</span><span class="n">quantiles</span><span class="p">)</span>
+<span class="n">td</span><span class="o">.</span><span class="n">variance</span>   <span class="c1"># new in 0.1.4</span>
+
+<span class="c1"># these results are close to numpy values (note that numpy provides only unweighted quantiles)</span>
+<span class="n">np</span><span class="o">.</span><span class="n">average</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">weights</span><span class="o">=</span><span class="n">w</span><span class="p">)</span>  <span class="c1"># mean should be exact</span>
+<span class="n">np</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">quantiles</span><span class="p">)</span>
+
+<span class="c1"># TDigest can be copied</span>
+<span class="n">td2</span> <span class="o">=</span> <span class="n">td</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="c1"># and multiple TDigests can be added together to provide approximate quantiles for the overall dataset</span>
+<span class="n">td</span> <span class="o">+</span> <span class="n">td2</span>
+</pre></div>
+</div>
+</section>
+<section id="performance">
+<h2>Performance<a class="headerlink" href="#performance" title="Permalink to this heading">¶</a></h2>
+<p>Ted Dunning’s original algorithm in Java takes about ~140 ns per addition on average. This package needs about ~200 ns
+per addition when called from Python on numpy arrays, so the performance is fairly comparable with the original
+implementation. All other tested TDigest implementations in Python are much slower.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pytdigest</span> <span class="kn">import</span> <span class="n">TDigest</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PCG64</span><span class="p">(</span><span class="mi">12345</span><span class="p">))</span>
+
+<span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">100_000</span><span class="p">,</span> <span class="mi">1_000_000</span><span class="p">,</span> <span class="mi">10_000_000</span><span class="p">]:</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+
+    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="n">td</span> <span class="o">=</span> <span class="n">TDigest</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+    <span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PyTDigest, n = </span><span class="si">{</span><span class="n">n</span><span class="si">:</span><span class="s1">,</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">:</span><span class="s1">.3g</span><span class="si">}</span><span class="s1"> seconds&#39;</span><span class="p">)</span>
+
+<span class="c1"># PyTDigest, n = 100,000: 0.0222 seconds</span>
+<span class="c1"># PyTDigest, n = 1,000,000: 0.21 seconds</span>
+<span class="c1"># PyTDigest, n = 10,000,000: 2.02 seconds</span>
+</pre></div>
+</div>
+<p>Since version 0.1.4, PyTDigest calculates also the exact variance of the data. Single addition is slightly slower
+now (~220 ns).</p>
+</section>
+<section id="similar-packages">
+<h2>Similar packages<a class="headerlink" href="#similar-packages" title="Permalink to this heading">¶</a></h2>
+<p>Several Python packages or wrappers exist for the TDigest algorithm.</p>
+<section id="tdigest">
+<h3>tdigest<a class="headerlink" href="#tdigest" title="Permalink to this heading">¶</a></h3>
+<p>The most popular on GitHub is a pure Python
+<a class="reference external" href="https://github.com/CamDavidsonPilon/tdigest">tdigest package</a>. Pure Python implementation is indeed very slow – more than 100x
+slower than this package:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">pytdigest</span> <span class="kn">import</span> <span class="n">TDigest</span>
+<span class="kn">from</span> <span class="nn">tdigest</span> <span class="kn">import</span> <span class="n">TDigest</span> <span class="k">as</span> <span class="n">TDigestPython</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PCG64</span><span class="p">(</span><span class="mi">12345</span><span class="p">))</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">100_000</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+<span class="n">w</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">td</span> <span class="o">=</span> <span class="n">TDigest</span><span class="o">.</span><span class="n">compute</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">w</span><span class="p">)</span>
+<span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PyTDigest: </span><span class="si">{</span><span class="n">end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">:</span><span class="s1">.3g</span><span class="si">}</span><span class="s1"> seconds&#39;</span><span class="p">)</span>
+<span class="c1"># PyTDigest: 0.0246 seconds</span>
+
+<span class="n">tdp</span> <span class="o">=</span> <span class="n">TDigestPython</span><span class="p">()</span>
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">tdp</span><span class="o">.</span><span class="n">batch_update</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+<span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;TDigest: </span><span class="si">{</span><span class="n">end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">:</span><span class="s1">.3g</span><span class="si">}</span><span class="s1"> seconds&#39;</span><span class="p">)</span>
+<span class="c1"># TDigest: 7.26 seconds</span>
+</pre></div>
+</div>
+<p>Different weights for can be used in tdigest only with <cite>update</cite> method for adding a single observation.</p>
+</section>
+<section id="t-digest-cffi">
+<h3>t-digest CFFI<a class="headerlink" href="#t-digest-cffi" title="Permalink to this heading">¶</a></h3>
+<p>Other package is <a class="reference external" href="https://github.com/kpdemetriou/tdigest-cffi">t-digest CFFI</a>, a thin Python wrapper over C implementation. It does not pass
+batch updates into the C layer, so the iteration has to be done in python:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">tdigest</span> <span class="kn">import</span> <span class="n">TDigest</span> <span class="k">as</span> <span class="n">TDigestCFFI</span>
+<span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">PCG64</span><span class="p">(</span><span class="mi">12345</span><span class="p">))</span>
+<span class="n">n</span> <span class="o">=</span> <span class="mi">100_000</span>
+<span class="n">x</span> <span class="o">=</span> <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+
+<span class="n">tdcffi</span> <span class="o">=</span> <span class="n">TDigestCFFI</span><span class="p">()</span>
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="k">for</span> <span class="n">xx</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>
+    <span class="n">tdcffi</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">xx</span><span class="p">)</span>
+<span class="n">end</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;TDigest-CFFI: </span><span class="si">{</span><span class="n">end</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">start</span><span class="si">:</span><span class="s1">.3g</span><span class="si">}</span><span class="s1"> seconds&#39;</span><span class="p">)</span>
+<span class="c1"># TDigest-CFFI: 0.479 seconds</span>
+</pre></div>
+</div>
+<p>Hence, this package is still almost 20x slower than this package when used over numpy arrays. In addition, t-digest CFFI
+package allows only for integer weights.</p>
+</section>
+<section id="qtdigest">
+<h3>qtdigest<a class="headerlink" href="#qtdigest" title="Permalink to this heading">¶</a></h3>
+<p><a class="reference external" href="https://github.com/QunarOPS/qtdigest">qtdigest</a>’s own benchmarking states that 100 000 additions take about 1.7 s, so it is
+again almost 100x slower than this package.</p>
+</section>
+<section id="tdigestc">
+<h3>tdigestc<a class="headerlink" href="#tdigestc" title="Permalink to this heading">¶</a></h3>
+<p><a class="reference external" href="https://github.com/ajwerner/tdigestc">tdigestc</a> by ajwerner is a simple C implementation with wrappers for different
+languages. The Python wrapper is very basic, it is not published on PyPI and some functionality was missing
+in the underlying C implementation (for instance support for batch updates based on numpy arrays), so I took this
+package as the starting point and added several useful features for use as a standalone Python package.</p>
+</section>
+</section>
+<section id="future-plans">
+<h2>Future plans<a class="headerlink" href="#future-plans" title="Permalink to this heading">¶</a></h2>
+<p>There are several improvements that can be done in the future:</p>
+<ul class="simple">
+<li><p>TDigest can calculate exact variance in addition to mean.</p></li>
+<li><p>Alternating merging procedure (the centroids are always merged left to right in the C implementation,
+however Ted Dunning states that alternating merging improves the precision).</p></li>
+<li><p>Scaling function for merging centroids is hard-coded at the moment. Ted Dunning mentions several
+possible functions that can be used in merging.</p></li>
+<li><p>Centroids can store information about their variance - the resulting TDigest should be still
+composable and fast and it can work much better for discrete distributions.</p></li>
+</ul>
+</section>
+<section id="documentation">
+<h2>Documentation<a class="headerlink" href="#documentation" title="Permalink to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://protivinsky.github.io/pytdigest/index.html">https://protivinsky.github.io/pytdigest/index.html</a></p></li>
+</ul>
+</section>
+<section id="legal-stuff">
+<h2>Legal stuff<a class="headerlink" href="#legal-stuff" title="Permalink to this heading">¶</a></h2>
+<p>Apache License, Version 2.0,
+<a class="reference external" href="http://www.apache.org/licenses/LICENSE-2.0">http://www.apache.org/licenses/LICENSE-2.0</a></p>
+<dl class="simple">
+<dt>Copyright (c) 2015 Ted Dunning, All rights reserved.</dt><dd><p><a class="reference external" href="https://github.com/tdunning/t-digest">https://github.com/tdunning/t-digest</a></p>
+</dd>
+<dt>Copyright (c) 2018 Andrew Werner, All rights reserved.</dt><dd><p><a class="reference external" href="https://github.com/ajwerner/tdigestc">https://github.com/ajwerner/tdigestc</a></p>
+</dd>
+<dt>Copyright (c) 2022 Tomas Protivinsky, All rights reserved.</dt><dd><p><a class="reference external" href="https://github.com/protivinsky/pytdigest">https://github.com/protivinsky/pytdigest</a></p>
+</dd>
+</dl>
+</section>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">API</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="api/tdigest.html">TDigest</a></li>
+</ul>
+</div>
+</section>
+<section id="index">
+<h1>Index<a class="headerlink" href="#index" title="Permalink to this heading">¶</a></h1>
+<ul class="simple">
+<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
+</ul>
+</section>
+
+
+           </div>
+           
+          </div>
+          <footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+        <a href="api/tdigest.html" class="btn btn-neutral float-right" title="TDigest" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &#169; Copyright 2022, Tomas Protivinsky.
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
