@@ -35,10 +35,11 @@ Basic example
     td = TDigest.compute(x, w, compression=1_000)
     # td now contains "compressed" distribution: centroids with their means and weights
 
-    # TDigest can be used to provide mean or approximate quantiles (i.e. inverse CDF):
+    # TDigest can be used to provide mean, variance or approximate quantiles (i.e. inverse CDF):
     td.mean
     quantiles = [0., 0.01, 0.05, 0.25, 0.5, 0.75, 0.95, 0.99, 1.]
     td.inverse_cdf(quantiles)
+    td.variance   # new in 0.1.4
 
     # these results are close to numpy values (note that numpy provides only unweighted quantiles)
     np.average(x, weights=w)  # mean should be exact
@@ -77,6 +78,9 @@ implementation. All other tested TDigest implementations in Python are much slow
     # PyTDigest, n = 100,000: 0.0222 seconds
     # PyTDigest, n = 1,000,000: 0.21 seconds
     # PyTDigest, n = 10,000,000: 2.02 seconds
+
+Since version 0.1.4, PyTDigest calculates also the exact variance of the data. Single addition is slightly slower
+now (~220 ns).
 
 Similar packages
 ----------------

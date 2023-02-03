@@ -88,6 +88,31 @@ def test_correct_weighted_calculation():
         assert math.isclose(q1, q2, rel_tol=1e-3)
 
 
+def test_mean_and_variance_calculation():
+    rng = np.random.Generator(np.random.PCG64(12345))
+    n = 100_000
+    xarr = rng.normal(loc=100, scale=20, size=n)
+    td = TDigest.compute(xarr, compression=1_000)
+    np_mean = np.mean(xarr)
+    np_variance = np.var(xarr)
+    np_std_dev = np.std(xarr)
+    assert math.isclose(np_mean, td.mean)
+    assert math.isclose(np_variance, td.variance)
+    assert math.isclose(np_std_dev, td.std_dev)
+
+
+def test_weighted_mean_and_variance_calculation():
+    rng = np.random.Generator(np.random.PCG64(12345))
+    n = 100_000
+    xarr = rng.normal(loc=100, scale=20, size=n)
+    warr = rng.normal(loc=10, scale=2, size=n)
+    td = TDigest.compute(xarr, warr, compression=1_000)
+    dsw = DescrStatsW(xarr, weights=warr)
+    assert math.isclose(td.mean, dsw.mean)
+    assert math.isclose(td.variance, dsw.var)
+    assert math.isclose(td.std_dev, dsw.std)
+
+
 def test_cdf():
     rng = np.random.Generator(np.random.PCG64(12345))
     xarr = rng.normal(loc=0, scale=1, size=100_000)

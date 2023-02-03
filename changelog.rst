@@ -1,6 +1,12 @@
 Changelog
 =========
 
+Version 0.1.4 (2023-02-03)
+--------------------------
+
+* Added calculation of exact variance
+
+
 Version 0.1.1 (2022-11-28)
 --------------------------
 
