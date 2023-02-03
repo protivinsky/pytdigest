@@ -31,7 +31,7 @@ with open('README.rst') as f:
 
 setup(
       name='pytdigest',
-      version='0.1.3',
+      version='0.1.4',
       description='Python package for *fast* TDigest calculation.',
       long_description=readme,
       #py_modules=['pytdigest'],

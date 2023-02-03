@@ -39,6 +39,8 @@ class _TDigest(ctypes.Structure):
         ("num_unmerged", ctypes.c_int),
         ("merged_weight", ctypes.c_double),
         ("unmerged_weight", ctypes.c_double),
+        ("mean", ctypes.c_double),
+        ("variance", ctypes.c_double),
         ("centroids", _Centroid * 0)
     ]
 
@@ -378,7 +380,26 @@ class TDigest:
         if self.weight == 0:
             return np.nan
         else:
-            return _lib.td_total_sum(self._tdigest) / self.weight
+            return self._tdigest.contents.mean
+            # return _lib.td_total_sum(self._tdigest) / self.weight
+
+    @property
+    def variance(self):
+        """Exact variance of the data (biased, i.e. normalized by total weight without doff correction)."""
+        if self.weight == 0:
+            return np.nan
+        else:
+            return self._tdigest.contents.variance
+
+    @property
+    def var(self):
+        """Alias for variance."""
+        return self.variance
+
+    @property
+    def std_dev(self):
+        """Standard deviation, not corrected for doff."""
+        return np.sqrt(self.variance)
 
     @property
     def _delta(self):

@@ -110,6 +110,10 @@ struct tdigest {
     double merged_weight;
     double unmerged_weight;
 
+    // calculate also overall variance
+    double mean;
+    double variance;
+
     centroid_t centroids[0];
 };
 
@@ -159,6 +163,8 @@ static tdigest_t *td_init(double delta, size_t buf_size, char *buf) {
             .merged_weight = 0,
             .num_unmerged = 0,
             .unmerged_weight = 0,
+            .mean = 0.,
+            .variance = 0.,
     };
     return td;
 }
@@ -187,6 +193,8 @@ void td_reset(tdigest_t *td) {
     td->merged_weight = 0;
     td->num_unmerged = 0;
     td->unmerged_weight = 0;
+    td->mean = 0.;
+    td->variance = 0.;
 }
 
 DLL_EXPORT void td_scale_weight(tdigest_t *td, double factor) {
@@ -203,6 +211,7 @@ void td_shift(tdigest_t *td, double shift) {
     for (int i = 0; i < td->num_merged; i++) {
         td->centroids[i].mean += shift;
     }
+    td->mean += shift;
 }
 
 DLL_EXPORT double td_total_weight(tdigest_t *td) {
@@ -210,6 +219,7 @@ DLL_EXPORT double td_total_weight(tdigest_t *td) {
 }
 
 DLL_EXPORT double td_total_sum(tdigest_t *td) {
+    // shall I just return td->mean * total_weight?
     centroid_t *c = NULL;
     double sum = 0;
     int num_centroids = td->num_merged + td->num_unmerged;
@@ -229,6 +239,17 @@ DLL_EXPORT void td_add(tdigest_t *td, double mean, double weight) {
         .weight = weight,
     };
     td->num_unmerged++;
+
+    // update mean and variance
+    // alternatively it is possible to have variance in centroids and do the calculation only on merge
+    // it would be faster and require only slightly more memory
+    // also, it would work better for discrete distributions
+    double total_weight = td->merged_weight + td->unmerged_weight;
+    double delta = mean - td->mean;
+    double ratio = weight / (weight + total_weight);
+    td->mean += delta * ratio;
+    td->variance = (1 - ratio) * (td->variance + ratio * delta * delta);
+
     td->unmerged_weight += weight;
 }
 
@@ -406,6 +427,14 @@ DLL_EXPORT void td_add_batch(tdigest_t *td, int num_values, double *means, doubl
                 .weight = weights[i],
         };
         td->num_unmerged++;
+
+        // update mean and variance
+        double total_weight = td->merged_weight + td->unmerged_weight;
+        double delta = means[i] - td->mean;
+        double ratio = weights[i] / (weights[i] + total_weight);
+        td->mean += delta * ratio;
+        td->variance = (1 - ratio) * (td->variance + ratio * delta * delta);
+
         td->unmerged_weight += weights[i];
     }
 }
@@ -453,24 +482,13 @@ DLL_EXPORT void td_get_centroids(tdigest_t *td, double *centroids) {
     }
 }
 
-DLL_EXPORT tdigest_t *td_of_centroids(double delta, int num_centroids, double *centroids) {
-    tdigest_t *td = td_new(delta);
-    double total_weight = 0;
-    for (int i = 0; i < num_centroids; i++) {
-        td->centroids[i] = (centroid_t) {
-                    .mean = centroids[2 * i],
-                    .weight = centroids[2 * i + 1],
-                };
-        total_weight += centroids[2 * i + 1];
-    }
-    td->num_unmerged = num_centroids;
-    td->unmerged_weight = total_weight;
-    merge(td);
-    return td;
-}
-
 DLL_EXPORT void td_fill_centroids(tdigest_t *td, int num_centroids, double *centroids) {
-    double total_weight = 0;
+    double total_weight = 0.;
+    td->num_merged = 0;
+    td->merged_weight = 0.;
+    td->mean = 0.;
+    td->variance = 0.;
+
     int cap = (num_centroids < td->max_centroids) ? num_centroids : td->max_centroids;
     for (int i = 0; i < cap; i++) {
         td->centroids[i] = (centroid_t) {
@@ -478,11 +496,23 @@ DLL_EXPORT void td_fill_centroids(tdigest_t *td, int num_centroids, double *cent
             .weight = centroids[2 * i + 1],
         };
         total_weight += centroids[2 * i + 1];
+        // update mean and variance
+        double delta = centroids[2 * i] - td->mean;
+        double ratio = centroids[2 * i + 1] / total_weight;
+        td->mean += delta * ratio;
+        td->variance = (1 - ratio) * (td->variance + ratio * delta * delta);
     }
     td->num_unmerged = num_centroids;
     td->unmerged_weight = total_weight;
     merge(td);
 }
+
+DLL_EXPORT tdigest_t *td_of_centroids(double delta, int num_centroids, double *centroids) {
+    tdigest_t *td = td_new(delta);
+    td_fill_centroids(td, num_centroids, centroids);
+    return td;
+}
+
 
 
 //int main() {
