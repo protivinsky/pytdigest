@@ -59,6 +59,16 @@ Basic example
     # and multiple TDigests can be added together to provide approximate quantiles for the overall dataset
     td + td2
 
+Installation
+------------
+
+From PyPI:
+
+.. code:: bash
+
+    $ pip install pytdigest
+
+
 Performance
 -----------
 
