@@ -48,7 +48,7 @@ DLL_EXPORT double td_quantile_of(tdigest_t *h, double val);
 
 // td_trimmed_mean returns the mean of data from the lo quantile to the
 // hi quantile.
-double td_trimmed_mean(tdigest_t *h, double lo, double hi);
+DLL_EXPORT double td_trimmed_mean(tdigest_t *h, double lo, double hi);
 
 // td_total_count returns the total count contained in h.
 DLL_EXPORT double td_total_weight(tdigest_t *h);
