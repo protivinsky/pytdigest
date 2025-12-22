@@ -393,7 +393,7 @@ double td_trimmed_mean(tdigest_t *td, double lo, double hi) {
             count_seen += td->centroids[i-1].weight;
         }
         centroid_t *c = &td->centroids[i];
-        if (c->weight < left_tail_weight) {
+        if (count_seen + c->weight < left_tail_weight) {
             continue;
         }
         if (count_seen > right_tail_weight) {
