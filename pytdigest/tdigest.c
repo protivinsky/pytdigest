@@ -381,11 +381,8 @@ DLL_EXPORT double td_value_at(tdigest_t *td, double q) {
     return m * x + cl->mean;
 }
 
-// FIXME: doesn't it assume it is sorted? but it does not have to be, right?
 double td_trimmed_mean(tdigest_t *td, double lo, double hi) {
-    if (should_merge(td)) {
-        merge(td);
-    }
+    merge(td);
     double total_weight = td->merged_weight;
     double left_tail_weight = lo * total_weight;
     double right_tail_weight = hi * total_weight;
