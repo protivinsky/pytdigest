@@ -48,7 +48,7 @@ DLL_EXPORT double td_quantile_of(tdigest_t *h, double val);
 
 // td_trimmed_mean returns the mean of data from the lo quantile to the
 // hi quantile.
-double td_trimmed_mean(tdigest_t *h, double lo, double hi);
+DLL_EXPORT double td_trimmed_mean(tdigest_t *h, double lo, double hi);
 
 // td_total_count returns the total count contained in h.
 DLL_EXPORT double td_total_weight(tdigest_t *h);
@@ -381,11 +381,8 @@ DLL_EXPORT double td_value_at(tdigest_t *td, double q) {
     return m * x + cl->mean;
 }
 
-// FIXME: doesn't it assume it is sorted? but it does not have to be, right?
 double td_trimmed_mean(tdigest_t *td, double lo, double hi) {
-    if (should_merge(td)) {
-        merge(td);
-    }
+    merge(td);
     double total_weight = td->merged_weight;
     double left_tail_weight = lo * total_weight;
     double right_tail_weight = hi * total_weight;
@@ -396,7 +393,7 @@ double td_trimmed_mean(tdigest_t *td, double lo, double hi) {
             count_seen += td->centroids[i-1].weight;
         }
         centroid_t *c = &td->centroids[i];
-        if (c->weight < left_tail_weight) {
+        if (count_seen + c->weight < left_tail_weight) {
             continue;
         }
         if (count_seen > right_tail_weight) {

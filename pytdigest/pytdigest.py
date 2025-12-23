@@ -77,6 +77,9 @@ _lib.td_inverse_cdf_batch.argtypes = [
     ndpointer(ctypes.c_double, flags="C_CONTIGUOUS"),
 ]
 
+_lib.td_trimmed_mean.argtypes = [ctypes.POINTER(_TDigest), ctypes.c_double, ctypes.c_double]
+_lib.td_trimmed_mean.restype = ctypes.c_double
+
 _lib.td_merge.argtypes = [ctypes.POINTER(_TDigest), ctypes.POINTER(_TDigest)]
 
 _lib.td_total_weight.argtypes = [ctypes.POINTER(_TDigest)]
@@ -279,6 +282,19 @@ class TDigest:
             return values
         else:
             raise TypeError("Quantile is unrecognized type.")
+
+    def trimmed_mean(self, lo: float, hi: float) -> float:
+        """Calculate the trimmed mean of data from the lo quantile to the hi quantile.
+
+        Args:
+            lo: Lower quantile (between 0 and 1) - data below this quantile is excluded.
+            hi: Upper quantile (between 0 and 1) - data above this quantile is excluded.
+
+        Returns:
+            The mean of data between the lo and hi quantiles.
+
+        """
+        return _lib.td_trimmed_mean(self._tdigest, lo, hi)
 
     def __iadd__(self, other):
         if not isinstance(other, TDigest):
